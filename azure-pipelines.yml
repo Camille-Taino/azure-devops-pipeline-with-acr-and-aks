@@ -23,31 +23,31 @@ stages:
           - download: current
             artifact: manifests
 
-      steps:
-      - task: AzureCLI@2
-        inputs:
-          azureSubscription: 'Kubernetes Cluster Connection'
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          inlineScript: |
-            docker build -t dockerandarm.azurecr.io/web-game:tag 2048-game
-            az acr login -n dockerandarm.azurecr.io
-            docker push dockerandarm.azurecr.io/web-game:tag
 
-      - script: cat 01_kubernetes_aks/app-deploy.yaml
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Kubernetes Cluster Connection'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                docker build -t dockerandarm.azurecr.io/web-game:tag 2048-game
+                az acr login -n dockerandarm.azurecr.io
+                docker push dockerandarm.azurecr.io/web-game:tag
 
-      - task: Kubernetes@1
-        inputs:
-          connectionType: 'Azure Resource Manager'
-          azureSubscriptionEndpoint: 'Kubernetes Cluster Connection'
-          azureResourceGroup: 'hannah.c.m.taino-RG'
-          kubernetesCluster: 'dockerandarm'
-          namespace: 'default'
-          command: 'apply'
-          useConfigurationFile: true
-          configuration: '01_kubernetes_aks'
-          secretType: 'dockerRegistry'
-          containerRegistryType: 'Azure Container Registry'
-          azureSubscriptionEndpointForSecrets: 'Kubernetes Cluster Connection'
-          azureContainerRegistry: 'dockerandarm.azurecr.io'
-          forceUpdate: false
+          - script: cat 01_kubernetes_aks/app-deploy.yaml
+
+          - task: Kubernetes@1
+            inputs:
+              connectionType: 'Azure Resource Manager'
+              azureSubscriptionEndpoint: 'Kubernetes Cluster Connection'
+              azureResourceGroup: 'hannah.c.m.taino-RG'
+              kubernetesCluster: 'dockerandarm'
+              namespace: 'default'
+              command: 'apply'
+              useConfigurationFile: true
+              configuration: '01_kubernetes_aks'
+              secretType: 'dockerRegistry'
+              containerRegistryType: 'Azure Container Registry'
+              azureSubscriptionEndpointForSecrets: 'Kubernetes Cluster Connection'
+              azureContainerRegistry: 'dockerandarm.azurecr.io'
+              forceUpdate: false
