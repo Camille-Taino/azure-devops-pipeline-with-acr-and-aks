@@ -4,25 +4,15 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-stages:
-- stage: 'Deploy'
-  displayName: 'Deploy the containers'
-  dependsOn: Build
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    pool:
-      vmImage: 'ubuntu-latest'
-    environment: 'Dev'
-    variables:
-    - group: Release
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            artifact: manifests
-
+  stages:
+    - stage: 'Dev' #Stage name cannot have spaces
+      displayName: 'Dev' #Name displayed when viewing in Azure DevOps
+      jobs:
+      - job: 'Build_Job' #Job name cannot have spaces
+        displayName: 'Application Build Dev Environment' #Name displayed when viewing in Azure DevOps
+        pool:
+          vmImage: ubuntu-latest #See available agent images: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
+        steps:
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'Kubernetes Cluster Connection'
