@@ -4,39 +4,31 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-  stages:
-    - stage: 'Dev' #Stage name cannot have spaces
-      displayName: 'Dev' #Name displayed when viewing in Azure DevOps
-      jobs:
-      - job: 'Build_Job' #Job name cannot have spaces
-        displayName: 'Application Build Dev Environment' #Name displayed when viewing in Azure DevOps
-        pool:
-          vmImage: ubuntu-latest #See available agent images: https://docs.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops#use-a-microsoft-hosted-agent
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'Kubernetes Cluster Connection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                docker build -t dockerandarm.azurecr.io/web-game:tag 2048-game
-                az acr login -n dockerandarm.azurecr.io
-                docker push dockerandarm.azurecr.io/web-game:tag
+steps:
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'Kubernetes Cluster Connection'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      docker build -t dockerandarm.azurecr.io/web-game:tag 2048-game
+      az acr login -n dockerandarm.azurecr.io
+      docker push dockerandarm.azurecr.io/web-game:tag
 
-          - script: cat 01_kubernetes_aks/app-deploy.yaml
+- script: cat 01_kubernetes_aks/app-deploy.yaml
 
-          - task: Kubernetes@1
-            inputs:
-              connectionType: 'Azure Resource Manager'
-              azureSubscriptionEndpoint: 'Kubernetes Cluster Connection'
-              azureResourceGroup: 'hannah.c.m.taino-RG'
-              kubernetesCluster: 'dockerandarm'
-              namespace: 'default'
-              command: 'apply'
-              useConfigurationFile: true
-              configuration: '01_kubernetes_aks'
-              secretType: 'dockerRegistry'
-              containerRegistryType: 'Azure Container Registry'
-              azureSubscriptionEndpointForSecrets: 'Kubernetes Cluster Connection'
-              azureContainerRegistry: 'dockerandarm.azurecr.io'
-              forceUpdate: false
+- task: Kubernetes@1
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscriptionEndpoint: 'Kubernetes Cluster Connection'
+    azureResourceGroup: 'hannah.c.m.taino-RG'
+    kubernetesCluster: 'dockerandarm'
+    namespace: 'default'
+    command: 'apply'
+    useConfigurationFile: true
+    configuration: '01_kubernetes_aks'
+    secretType: 'dockerRegistry'
+    containerRegistryType: 'Azure Container Registry'
+    azureSubscriptionEndpointForSecrets: 'Kubernetes Cluster Connection'
+    azureContainerRegistry: 'dockerandarm.azurecr.io'
+    forceUpdate: false
