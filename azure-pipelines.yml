@@ -23,7 +23,6 @@ stages:
           - download: current
             artifact: manifests
 
-
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'Kubernetes Cluster Connection'
